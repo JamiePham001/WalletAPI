@@ -13,7 +13,7 @@ GET {{rootURL}}/wallets/undefined
 Accept: application/json
 
 ###
-POST {{rootURL}}/wallets/tx102/credit
+POST {{rootURL}}/wallets/tx123/credit
 Content-Type: application/json
 
 {
@@ -22,5 +22,23 @@ Content-Type: application/json
 
 ###
 
+POST {{rootURL}}/wallets/tx123/debit
+Content-Type: application/json
+
+{
+    "transactionId": "tx123",
+    "coins": 2000
+}
+
+###
+
+POST {{rootURL}}/wallets/tx123/debit
+Content-Type: application/json
+
+{
+    "coins": 500
+}
+
+###
 PUT {{rootURL}}/wallets/refresh
 Content-Type: application/json

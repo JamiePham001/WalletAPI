@@ -39,6 +39,7 @@ public class WalletsController : ControllerBase
     {
         try
         {
+            // search for duplicate id. If so, duplicate object
             var wallet = wallets.FirstOrDefault(x => x.transactionId == id);
             if (wallet != null)
             {
@@ -56,6 +57,30 @@ public class WalletsController : ControllerBase
             return Created("somewhere", creditObj);
         }
         catch (Exception e)
+        {
+            return BadRequest(e.Message);
+        }
+
+    }
+    [HttpPost("{id}/debit")]
+    public ActionResult<List<Wallet>> DebitWallet(string id, [FromBody] Wallet debit)
+    {
+        try
+        {
+            // check if id exists 
+            var wallet = wallets.FirstOrDefault(x => x.transactionId == id);
+            if (wallet is null)
+            {
+                return NotFound("Id returned with no matches.");
+            }
+            object total = wallet.Debit(debit.coins);
+            return Created("somewhere", total);
+        }
+        catch (InvalidOperationException e)
+        {
+            return BadRequest(e.Message);
+        }
+        catch (ArgumentOutOfRangeException e)
         {
             return BadRequest(e.Message);
         }
