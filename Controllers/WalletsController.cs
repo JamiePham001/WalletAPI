@@ -34,5 +34,40 @@ public class WalletsController : ControllerBase
 
         return Ok(wallet);
     }
+    [HttpPost("{id}/credit")]
+    public ActionResult<List<Wallet>> CreateWallet(string id)
+    {
+        try
+        {
+            var wallet = wallets.FirstOrDefault(x => x.transactionId == id);
+            if (wallet != null)
+            {
+                wallets.Add(wallet);
+                return Accepted(wallet);
+            }
+
+            Wallet newWallet = new()
+            {
+                transactionId = id,
+            };
+            object creditObj = newWallet.Credit(1000);
+            wallets.Add(newWallet);
+
+            return Created("somewhere", creditObj);
+        }
+        catch (Exception e)
+        {
+            return BadRequest(e.Message);
+        }
+
+    }
+    // controller for testing purposes
+    [HttpPut("refresh")]
+    public IActionResult RefreshData()
+    {
+        wallets.Clear();
+        return Ok(wallets);
+    }
+
 }
 
