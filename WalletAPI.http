@@ -1,0 +1,26 @@
+@rootURL = http://localhost:5168
+
+GET {{rootURL}}/wallets/
+Accept: application/json
+
+###
+GET {{rootURL}}/wallets/tx101
+Accept: application/json
+
+###
+
+GET {{rootURL}}/wallets/undefined
+Accept: application/json
+
+###
+POST {{rootURL}}/wallets/tx102/credit
+Content-Type: application/json
+
+{
+    "transactionId": "tx102"
+}
+
+###
+
+PUT {{rootURL}}/wallets/refresh
+Content-Type: application/json
