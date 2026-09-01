@@ -1,4 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
+using WalletAPI.Data;
 using WalletAPI.models;
 
 namespace WalletAPI.Controllers;
@@ -7,16 +9,19 @@ namespace WalletAPI.Controllers;
 [Route("[controller]")]
 public class WalletsController : ControllerBase
 {
-    private static readonly List<Wallet> wallets = [];
+    private readonly ApplicationDbContext _dbContext;
+    public WalletsController(ApplicationDbContext dbContext) => _dbContext = dbContext;
+
+    // private static readonly List<Wallet> wallets = [];
     [HttpGet]
-    public ActionResult<List<Wallet>> GetWallets()
+    public async Task<ActionResult<List<Wallet>>> GetWallets()
     {
-        return Ok(wallets);
+        return Ok(await _dbContext.Wallet.ToListAsync());
     }
     [HttpGet("{id}")]
-    public ActionResult<List<Wallet>> GetWalletById(string id)
+    public async Task<ActionResult<List<Wallet>>> GetWalletById(string id)
     {
-        var wallet = wallets.FirstOrDefault(x => x.walletId == id);
+         var wallet = await _dbContext.Wallet.FindAsync(id);
         if (wallet is null)
         {
             return NotFound();
@@ -25,27 +30,30 @@ public class WalletsController : ControllerBase
         return Ok(wallet);
     }
     [HttpPost("{id}/credit")]
-    public ActionResult<List<Wallet>> CreateWallet(string id, [FromBody] RequestBody req)
+    public async Task<ActionResult<List<Wallet>>> CreateWallet(string id, [FromBody] RequestBody req)
     {
         try
         {
-            var wallet = wallets.FirstOrDefault(x => x.walletId == id);
+            var wallet = await _dbContext.Wallet.FindAsync(id);
             // if wallet doesnt exist, create a new wallet
             if (wallet is null)
             {
                 Wallet newWallet = new(id);
                 object? credittedWallet = newWallet.Credit(req.coins, req.transactionId);
-                wallets.Add(newWallet);
+                await _dbContext.Wallet.AddAsync(newWallet);
+                await _dbContext.SaveChangesAsync();
                 return Created("somewhere", credittedWallet);
             }
 
             // if wallet exists, check for idempotency
-            object? creditObj = wallet.Credit(req.coins, req.transactionId);
+            Wallet? creditObj = wallet.Credit(req.coins, req.transactionId);
             if (creditObj is null)
             {
                 return Accepted(wallet);
             }
 
+            _dbContext.Wallet.Update(creditObj);
+            await _dbContext.SaveChangesAsync();
             return Created("somewhere", creditObj);
         }
         catch (Exception e)
@@ -55,22 +63,24 @@ public class WalletsController : ControllerBase
 
     }
     [HttpPost("{id}/debit")]
-    public ActionResult<List<Wallet>> DebitWallet(string id, [FromBody] RequestBody req)
+    public async Task<ActionResult<List<Wallet>>> DebitWallet(string id, [FromBody] RequestBody req)
     {
         try
         {
             // check if wallet exists 
-            var wallet = wallets.FirstOrDefault(x => x.walletId == id);
+            var wallet = await _dbContext.Wallet.FindAsync(id);
             if (wallet is null)
             {
                 return NotFound("Id returned with no matches.");
             }
-            object? debitObj = wallet.Debit(req.coins, req.transactionId);
+            Wallet? debitObj = wallet.Debit(req.coins, req.transactionId);
             if (debitObj is null)
             {
                 return Accepted(wallet);
             }
 
+            _dbContext.Wallet.Update(debitObj);
+            await _dbContext.SaveChangesAsync();
             return Created("somewhere", debitObj);
         }
         catch (ArgumentException e)
@@ -81,11 +91,13 @@ public class WalletsController : ControllerBase
 
     }
     // controller for testing purposes
+    // Deletes all rows in table
     [HttpPut("refresh")]
-    public IActionResult RefreshData()
+    public async Task<IActionResult> RefreshData()
     {
-        wallets.Clear();
-        return Ok(wallets);
+        await _dbContext.Wallet.ExecuteDeleteAsync();
+        await _dbContext.SaveChangesAsync();
+        return Ok();
     }
 }
 

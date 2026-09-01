@@ -38,7 +38,7 @@ public class Wallet
     }
 
 
-    public object? Credit(int credit, string transactionId)
+    public Wallet? Credit(int credit, string transactionId)
     {
         // cant add negative credit
         if (credit <= 0)
@@ -58,7 +58,7 @@ public class Wallet
         return this;
     }
 
-    public object? Debit(int debit, string transactionId)
+    public Wallet? Debit(int debit, string transactionId)
     {
 
         // debit amount cant exceed balance nor can be a negative number
