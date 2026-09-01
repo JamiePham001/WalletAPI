@@ -7,17 +7,7 @@ namespace WalletAPI.Controllers;
 [Route("[controller]")]
 public class WalletsController : ControllerBase
 {
-    private static readonly List<Wallet> wallets =
-    [
-        new() {
-            transactionId = "tx101",
-            coins = 100,
-        },
-        new() {
-            transactionId = "tx103",
-            coins = 0,
-        }
-    ];
+    private static readonly List<Wallet> wallets = [];
     [HttpGet]
     public ActionResult<List<Wallet>> GetWallets()
     {
@@ -26,7 +16,7 @@ public class WalletsController : ControllerBase
     [HttpGet("{id}")]
     public ActionResult<List<Wallet>> GetWalletById(string id)
     {
-        var wallet = wallets.FirstOrDefault(x => x.transactionId == id);
+        var wallet = wallets.FirstOrDefault(x => x.walletId == id);
         if (wallet is null)
         {
             return NotFound();
@@ -35,24 +25,26 @@ public class WalletsController : ControllerBase
         return Ok(wallet);
     }
     [HttpPost("{id}/credit")]
-    public ActionResult<List<Wallet>> CreateWallet(string id)
+    public ActionResult<List<Wallet>> CreateWallet(string id, [FromBody] RequestBody req)
     {
         try
         {
-            // search for duplicate id. If so, duplicate object
-            var wallet = wallets.FirstOrDefault(x => x.transactionId == id);
-            if (wallet != null)
+            var wallet = wallets.FirstOrDefault(x => x.walletId == id);
+            // if wallet doesnt exist, create a new wallet
+            if (wallet is null)
             {
-                wallets.Add(wallet);
-                return Accepted(wallet);
+                Wallet newWallet = new(id);
+                object? credittedWallet = newWallet.Credit(req.coins, req.transactionId);
+                wallets.Add(newWallet);
+                return Created("somewhere", credittedWallet);
             }
 
-            Wallet newWallet = new()
+            // if wallet exists, check for idempotency
+            object? creditObj = wallet.Credit(req.coins, req.transactionId);
+            if (creditObj is null)
             {
-                transactionId = id,
-            };
-            object creditObj = newWallet.Credit(1000);
-            wallets.Add(newWallet);
+                return Accepted(wallet);
+            }
 
             return Created("somewhere", creditObj);
         }
@@ -63,27 +55,29 @@ public class WalletsController : ControllerBase
 
     }
     [HttpPost("{id}/debit")]
-    public ActionResult<List<Wallet>> DebitWallet(string id, [FromBody] Wallet debit)
+    public ActionResult<List<Wallet>> DebitWallet(string id, [FromBody] RequestBody req)
     {
         try
         {
-            // check if id exists 
-            var wallet = wallets.FirstOrDefault(x => x.transactionId == id);
+            // check if wallet exists 
+            var wallet = wallets.FirstOrDefault(x => x.walletId == id);
             if (wallet is null)
             {
                 return NotFound("Id returned with no matches.");
             }
-            object total = wallet.Debit(debit.coins);
-            return Created("somewhere", total);
+            object? debitObj = wallet.Debit(req.coins, req.transactionId);
+            if (debitObj is null)
+            {
+                return Accepted(wallet);
+            }
+
+            return Created("somewhere", debitObj);
         }
-        catch (InvalidOperationException e)
+        catch (ArgumentException e)
         {
             return BadRequest(e.Message);
         }
-        catch (ArgumentOutOfRangeException e)
-        {
-            return BadRequest(e.Message);
-        }
+
 
     }
     // controller for testing purposes
@@ -93,6 +87,6 @@ public class WalletsController : ControllerBase
         wallets.Clear();
         return Ok(wallets);
     }
-
 }
 
+public record RequestBody(string transactionId, int coins);
