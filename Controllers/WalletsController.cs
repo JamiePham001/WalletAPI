@@ -92,7 +92,7 @@ public class WalletsController : ControllerBase
     }
     // controller for testing purposes
     // Deletes all rows in table
-    [HttpPut("refresh")]
+    [HttpDelete("refresh")]
     public async Task<IActionResult> RefreshData()
     {
         await _dbContext.Wallet.ExecuteDeleteAsync();

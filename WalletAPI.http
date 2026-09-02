@@ -4,7 +4,7 @@ GET {{rootURL}}/wallets/
 Accept: application/json
 
 ###
-GET {{rootURL}}/wallets/tx101
+GET {{rootURL}}/wallets/7e178edd-4aa0-4f6c-9c8b-b3b901e10d1a
 Accept: application/json
 
 ###
@@ -42,5 +42,5 @@ Content-Type: application/json
 }
 
 ###
-PUT {{rootURL}}/wallets/refresh
+DELETE {{rootURL}}/wallets/refresh
 Content-Type: application/json

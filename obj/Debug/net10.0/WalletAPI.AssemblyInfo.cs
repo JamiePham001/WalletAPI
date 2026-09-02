@@ -10,10 +10,11 @@
 using System;
 using System.Reflection;
 
+[assembly: Microsoft.Extensions.Configuration.UserSecrets.UserSecretsIdAttribute("b8b829d8-9dfa-4bee-9e44-aae8fb21c33a")]
 [assembly: System.Reflection.AssemblyCompanyAttribute("WalletAPI")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+3acccd7ed3f0a84310ab818d1f097eee2b8f8451")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+59055e18074d7cdfe1f6870ad40131228494f41e")]
 [assembly: System.Reflection.AssemblyProductAttribute("WalletAPI")]
 [assembly: System.Reflection.AssemblyTitleAttribute("WalletAPI")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]
