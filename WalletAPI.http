@@ -4,7 +4,7 @@ GET {{rootURL}}/wallets/
 Accept: application/json
 
 ###
-GET {{rootURL}}/wallets/tx101
+GET {{rootURL}}/wallets/7e178edd-4aa0-4f6c-9c8b-b3b901e10d1a
 Accept: application/json
 
 ###
@@ -13,14 +13,34 @@ GET {{rootURL}}/wallets/undefined
 Accept: application/json
 
 ###
-POST {{rootURL}}/wallets/tx102/credit
+POST {{rootURL}}/wallets/7e178edd-4aa0-4f6c-9c8b-b3b901e10d1a/credit
 Content-Type: application/json
 
 {
-    "transactionId": "tx102"
+    "transactionId": "tx102",
+    "coins": 1000
 }
 
 ###
 
-PUT {{rootURL}}/wallets/refresh
+POST {{rootURL}}/wallets/7e178edd-4aa0-4f6c-9c8b-b3b901e10d1a/debit
+Content-Type: application/json
+
+{
+    "transactionId": "tx123",
+    "coins": 2000
+}
+
+###
+
+POST {{rootURL}}/wallets/7e178edd-4aa0-4f6c-9c8b-b3b901e10d1a/debit
+Content-Type: application/json
+
+{
+    "transactionId": "tx124",
+    "coins": 500
+}
+
+###
+DELETE {{rootURL}}/wallets/refresh
 Content-Type: application/json
